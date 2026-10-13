@@ -1,6 +1,6 @@
-const CACHE='cannon-castle-v5';
+const CACHE='cannon-castle-v6';
 const CDN=['https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js','https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js'];
-const SHELL=['/','/index.html','/style.css','/style.css?v=5','/game.js','/game.js?v=5','/damage.mjs','/assembly.mjs','/turrets.mjs','/software-renderer.mjs','/software-renderer.mjs?v=5','/pwa.js','/pwa.js?v=5','/manifest.webmanifest','/icons/icon-192.png','/icons/icon-512.png','/icons/apple-touch-icon.png'];
+const SHELL=['/','/index.html','/style.css','/style.css?v=6','/game.js','/game.js?v=6','/damage.mjs','/assembly.mjs','/turrets.mjs','/software-renderer.mjs','/software-renderer.mjs?v=6','/pwa.js','/pwa.js?v=6','/manifest.webmanifest','/icons/icon-192.png','/icons/icon-512.png','/icons/apple-touch-icon.png'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(CACHE);await cache.addAll(SHELL);await cache.addAll(CDN);await self.skipWaiting()})()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if(key.startsWith('cannon-castle-')&&key!==CACHE)await caches.delete(key);await self.clients.claim()})()));
 self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;const url=new URL(event.request.url);if(url.origin!==self.location.origin&&!CDN.includes(url.href))return;

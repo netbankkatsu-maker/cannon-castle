@@ -55,7 +55,7 @@ npm run dev
 | src/manifest.webmanifest | PWAの名称・起動・アイコン |
 | src/pwa.js / src/sw.js | インストール、オフラインキャッシュ、更新 |
 | src/icons/ | 192・512pxアイコンとApple用アイコン |
-| tests/*.test.mjs | Node標準の単体テスト（9件） |
+| tests/*.test.mjs | Node標準の単体テスト（11件） |
 | scripts/serve.mjs / scripts/build.mjs | 開発サーバー・静的ビルド |
 | vercel.json | Vercel設定 |
 
@@ -100,7 +100,7 @@ npm run dev
 
 - ホーム画面追加、standalone、Service Worker、PNGアイコン。
 - 初回オンラインでアプリとCDNモジュールのキャッシュが完了した後、オフライン起動を想定。
-- 現在キャッシュ名 cannon-castle-v6。主要アセットは ?v=6。
+- 現在キャッシュ名 cannon-castle-v7。主要アセットは ?v=7。
 - アプリのファイルはnetwork-first、CDNはcache-first。
 - 以前、古いSWのcache-firstで新HTMLと旧CSS/JSが混ざった。更新時はキャッシュ名とHTMLのアセットURLのバージョンを揃える。
 
@@ -121,3 +121,7 @@ npm run dev
 ## 続きを担当するCodexへの指示例
 
 このリポジトリの docs/codex-handoff.md と README.md を読み、現在のゲームを確認してから変更する。新規作り直しではなく既存実装を発展させる。タッチ砲撃・破壊率・逆再生・俯瞰配置・PWA・スマホUIを維持し、不要な説明やボタンを増やさない。変更に応じたテストとビルドを実行し、UI/UXはサブエージェントに評価させる。次に実装する機能はユーザーの指示に従う。
+
+## 2026-10-13 追加更新：原型崩壊判定・旗
+
+上記HP基準の説明は旧仕様。現在は上段構造70%以上かつ全ブロック55%以上が崩れたらクリア。HP95%でもクリアする保険条件は維持。HUDは構造崩壊の進捗、クリア時100%。瓦礫は残り、追加砲台はクリア後停止。旗は塔の最上段メッシュに追従、そのブロックの消滅時だけ独立物理で落下。PWAはv7。新しい判定テスト2件を追加し全11件。

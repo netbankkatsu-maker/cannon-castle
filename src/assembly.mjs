@@ -1,0 +1,1 @@
+export function assemblyProgress(elapsed,index,count,reduced=false){if(reduced)return 1;const delay=(index/Math.max(1,count-1))*.35;const t=Math.max(0,Math.min(1,(elapsed-delay)/1.05));return t*t*(3-2*t)}

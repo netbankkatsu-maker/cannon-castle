@@ -1,4 +1,4 @@
-const CACHE='cannon-castle-v2';
+const CACHE='cannon-castle-v3';
 const CDN=['https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js','https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js'];
 const SHELL=['/','/index.html','/style.css','/game.js','/damage.mjs','/assembly.mjs','/software-renderer.mjs','/pwa.js','/manifest.webmanifest','/icons/icon-192.png','/icons/icon-512.png','/icons/apple-touch-icon.png'];
 self.addEventListener('install',event=>{event.waitUntil((async()=>{const cache=await caches.open(CACHE);await cache.addAll(SHELL);await cache.addAll(CDN);await self.skipWaiting()})())});

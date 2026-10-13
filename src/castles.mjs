@@ -1,3 +1,4 @@
+import {MATERIALS} from './collision.mjs?v=10';
 export const CASTLE_TYPES=[
  {id:'fortress',name:'石造りの砦'},
  {id:'fairytale',name:'おとぎの城'},
@@ -6,15 +7,16 @@ export const CASTLE_TYPES=[
  {id:'citadel',name:'城壁都市'}
 ];
 export function castleBlueprint(stage=1){
- const type=CASTLE_TYPES[((Math.max(1,stage)-1)%5)],cells=new Map(),flags=[];
- const put=(x,r,z,tone='stone',kind='brick')=>{const key=[x,r,z].join(':');if(!cells.has(key))cells.set(key,{x,y:r*.79+.4,z,tone,kind});return key};
- const column=(x,z,height,tone='stone',roof=false)=>{for(let r=0;r<height;r++)put(x,r,z,tone);let key=[x,height-1,z].join(':');if(roof){key=put(x,height-.02,z,tone==='sand'?'sand':'blue','cone');const cap=cells.get(key);cap.y=(height-1)*.79+.4+.38+.9}return key};
- const wall=(x1,x2,z,height,tone='stone',gate=false)=>{for(let x=x1;x<=x2;x++)for(let r=0;r<height;r++){if(gate&&x===0&&r<2)continue;put(x,r,z,tone)}};
- const box=(x1,x2,z1,z2,height,tone='stone')=>{for(let x=x1;x<=x2;x++)for(let z=z1;z<=z2;z++)for(let r=0;r<height;r++){if(x===x1||x===x2||z===z1||z===z2)put(x,r,z,tone)}};
+ const type=CASTLE_TYPES[((Math.max(1,stage)-1)%5)],cells=new Map(),flags=[];let building='wall';
+ const put=(x,r,z,tone='stone',kind='brick')=>{const key=[x,r,z].join(':');if(!cells.has(key))cells.set(key,{x,y:r*.79+.4,z,tone,kind,buildingId:building});return key};
+ const column=(x,z,height,tone='stone',roof=false)=>{building='tower:'+x+':'+z;for(let r=0;r<height;r++)put(x,r,z,tone);let key=[x,height-1,z].join(':');if(roof){key=put(x,height-.02,z,tone==='sand'?'sand':'blue','cone');const cap=cells.get(key);cap.y=(height-1)*.79+.4+.38+.9}return key};
+ const wall=(x1,x2,z,height,tone='stone',gate=false)=>{building='wall:'+z;for(let x=x1;x<=x2;x++)for(let r=0;r<height;r++){if(gate&&x===0&&r<2)continue;put(x,r,z,tone)}};
+ const box=(x1,x2,z1,z2,height,tone='stone')=>{building='building:'+x1+':'+z1;for(let x=x1;x<=x2;x++)for(let z=z1;z<=z2;z++)for(let r=0;r<height;r++){if(x===x1||x===x2||z===z1||z===z2)put(x,r,z,tone)}};
  if(type.id==='fortress'){
   wall(-4,4,-2.5,4,'stone',true);wall(-4,4,-7.5,4);
   for(const x of [-4,4])for(let z=-6.5;z<=-3.5;z++)column(x,z,4);
   for(const x of [-4,4])for(const z of [-2.5,-7.5])flags.push(column(x,z,7));
+  box(-1,1,-5.5,-3.5,2,'terracotta');
   for(let x=-3;x<=3;x+=2){put(x,4,-2.5);put(x,4,-7.5)}
  }else if(type.id==='fairytale'){
   // A broad palace and many blue pointed roofs, dominated by a tall central tower.
@@ -44,6 +46,14 @@ export function castleBlueprint(stage=1){
   for(const x of [-2,1]){box(x,x+1,-6.5,-4.5,4,'ivory');for(let xx=x;xx<=x+1;xx++)for(let z=-6.5;z<=-4.5;z++)put(xx,4,z,'terracotta')}
   flags.push(column(0,-3.5,7,'brick',true));
  }
- const blocks=[...cells.entries()].map(([key,cell])=>({key,...cell}));
+ // The two stores sit behind the front wall, not in the turret placement area.
+ const store=(x,z,role,tone)=>{const key=[x,0,z].join(':');if(!cells.has(key)){building='store:'+role;put(x,0,z,tone)}const cell=cells.get(key);cell.role=role;cell.tone=tone;cell.buildingId='store:'+role;};
+ store(0,-3.5,'treasure','gold');store(1,-5.5,'powder','powder');
+ building='barracks';for(let r=0;r<2;r++){const key=put(-2,r,-4.5,'slate');const cell=cells.get(key);cell.buildingId='barracks';if(r===0)cell.role='barracks';}
+
+ const blocks=[...cells.entries()].map(([key,cell])=>{
+  const material=cell.role?'wood':cell.kind==='cone'||cell.tone==='terracotta'?'wood':['rose','brick'].includes(cell.tone)?'brick':'stone';
+  return {key,...cell,material,maxHP:MATERIALS[material].hp,mass:MATERIALS[material].mass*(cell.kind==='cone'?.65:1)};
+ });
  return {type,blocks,flags,maxHeight:Math.max(...blocks.map(b=>b.y+(b.kind==='cone'?.9:.38)))};
 }

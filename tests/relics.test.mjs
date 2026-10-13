@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {RELICS,drawRelics,relicEffects} from '../src/relics.mjs';
+test('loot offers are three unique valid choices with a benefit and a drawback',()=>{assert.equal(RELICS.length,8);for(const n of [0,.1,.5,.99,1,NaN]){const offers=drawRelics(()=>n);assert.equal(offers.length,3);assert.equal(new Set(offers).size,3);assert.ok(offers.every(id=>RELICS.some(r=>r.id===id)));}assert.ok(RELICS.every(r=>r.benefit&&r.drawback));});
+test('relic tradeoffs multiply and repeated picks stack',()=>{const effects=relicEffects(['siege','haste']);assert.equal(effects.power,1.35*.9);assert.equal(effects.reload,1.2*.8);assert.equal(relicEffects(['memory','memory']).souls,1.4**2);assert.deepEqual(relicEffects(['unknown']),relicEffects([]));});
+test('extreme stacks remain within practical bounds in both directions',()=>{assert.equal(relicEffects(Array(100).fill('glass')).power,10);assert.equal(relicEffects(Array(100).fill('glass')).incoming,5);assert.equal(relicEffects(Array(100).fill('haste')).reload,.25);assert.equal(relicEffects(Array(100).fill('haste')).power,.2);assert.equal(relicEffects(Array(100).fill('powder')).radius,2);assert.equal(relicEffects(Array(100).fill('memory')).coins,.2);assert.equal(relicEffects(Array(100).fill('memory')).souls,10);});

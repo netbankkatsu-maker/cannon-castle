@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {THREATS,drawThreat,getThreat} from '../src/threats.mjs';
+import {startJourney,defaultLoadout} from '../src/expedition.mjs';
+import {validateJourney} from '../src/journey-save.mjs';
+test('first day is quiet without drawing and later days can draw every variation',()=>{assert.equal(drawThreat(1,()=>{throw Error('must not draw');}),'quiet');assert.equal(THREATS.length,5);for(let i=0;i<5;i++)assert.equal(drawThreat(2,()=>i/5+.01),THREATS[i].id);assert.equal(drawThreat(2,()=>1),'fractured');assert.equal(drawThreat(2,()=>-1),'quiet');assert.equal(drawThreat(2,()=>NaN),'quiet');assert.equal(getThreat('unknown').id,'quiet');});
+test('modifiers change only their intended properties and remain positive',()=>{assert.equal(getThreat('armor').hpMultiplier,1.25);assert.equal(getThreat('legion').spawnMultiplier,.8);assert.equal(getThreat('embers').damageMultiplier,1.35);assert.equal(getThreat('fractured').coinMultiplier,1.15);assert.ok(THREATS.every(t=>[t.hpMultiplier,t.damageMultiplier,t.spawnMultiplier,t.coinMultiplier].every(n=>Number.isFinite(n)&&n>0)));});
+test('daily variation persists across reload and old saves default quiet',()=>{const state={version:2,screen:'battle',souls:0,altarOwned:[],loadout:{...defaultLoadout},sound:true,run:startJourney(),bestDay:1,journeys:1};assert.equal(state.run.threat,'quiet');state.run.threat='embers';state.run.pendingChoices=['siege','haste','ward'];assert.equal(validateJourney(state).run.threat,'embers');assert.deepEqual(validateJourney(state).run.pendingChoices,state.run.pendingChoices);delete state.run.threat;assert.equal(validateJourney(state).run.threat,'quiet');state.run.threat='unknown';assert.equal(validateJourney(state),null);});

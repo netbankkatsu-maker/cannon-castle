@@ -1,0 +1,9 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {SAVE_KEY,loadSave,writeSave,validateSave} from '../src/save.mjs';
+const state=()=>({version:1,coins:123.25,stage:6,levels:{power:3,speed:2,auto:1},owned:['large','weight'],turrets:[{x:-9,z:-10}],auto:true,sound:false,treasureClaimed:[1,2],clearClaimed:[1]});
+const memory=()=>{const map=new Map();return {getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)}};
+test('save round trip preserves progress and strips runtime fields',()=>{const storage=memory();const original=state();original.turrets[0].group={};assert.equal(writeSave(storage,original),true);const restored=loadSave(storage);assert.deepEqual(restored,state());assert.equal(restored.coins,123.25);assert.equal(restored.sound,false);});
+test('malformed saves reject invalid levels, dependencies, stages and grid cells',()=>{for(const change of [{version:2},{coins:Infinity},{coins:-1},{stage:0},{levels:{power:0,speed:1,auto:0}},{owned:['weight']},{owned:['large','large']},{owned:['unknown']},{turrets:[{x:0,z:-4}]},{turrets:[{x:-9,z:-10},{x:-9,z:-10}]}])assert.equal(validateSave({...state(),...change}),null);});
+test('missing and corrupt saves or unavailable storage never prevent startup',()=>{const storage=memory();assert.equal(loadSave(storage),null);storage.setItem(SAVE_KEY,'bad json');assert.equal(loadSave(storage),null);const broken={getItem(){throw Error('blocked')},setItem(){throw Error('quota')}};assert.equal(loadSave(broken),null);assert.equal(writeSave(broken,state()),false);assert.equal(writeSave(storage,{...state(),coins:-1}),false);});
+test('claims are deduplicated and copies cannot mutate input progress',()=>{const original=state();original.treasureClaimed=[1,1,2];const checked=validateSave(original);assert.deepEqual(checked.treasureClaimed,[1,2]);checked.levels.power=100;checked.owned.push('impact');assert.equal(original.levels.power,3);assert.equal(original.owned.includes('impact'),false);});

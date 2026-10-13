@@ -1,5 +1,5 @@
 import {turretPrice,availableCells,canPlaceTurret,reloadProgress,velocityToTarget} from './turrets.mjs';
-import {SoftwareRenderer} from './software-renderer.mjs';
+import {SoftwareRenderer} from './software-renderer.mjs?v=5';
 import {assemblyProgress} from './assembly.mjs';
 import {BLOCK_HP, damageBlock, destructionPercent, blastDamage, shouldClearRubble} from './damage.mjs';
 

@@ -1,5 +1,5 @@
-import {UPGRADES} from './progression.mjs?v=10';
-import {availableCells} from './turrets.mjs?v=10';
+import {UPGRADES} from './progression.mjs?v=12';
+import {availableCells} from './turrets.mjs?v=12';
 export const SAVE_KEY='cannon-castle-save-v1';
 const integer=(n,min,max)=>Number.isSafeInteger(n)&&n>=min&&n<=max;
 const claims=(values)=>Array.isArray(values)&&values.every(n=>integer(n,1,10000))?[...new Set(values)]:[];

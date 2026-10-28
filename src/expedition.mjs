@@ -2,7 +2,7 @@ const definitions=[
  ['vessel','頑丈な砲台','最大耐久 ＋50',8,[],100,110],
  ['reserve','器の拡張','灰の器 ＋20',8,[],300,110],
  ['might','砲術の刻印','砲撃威力 ＋20%',10,[],500,110],
- ['memory','遠征の記憶','開始コイン ＋100',10,[],700,110],
+ ['memory','遠征の記憶','開始刻印片 ＋100',10,[],700,110],
  ['bulwark','不落の砲台','最大耐久 ＋50',20,['vessel'],100,310],
  ['arsenal','深い灰の器','灰の器 ＋30',20,['reserve'],300,310],
  ['legacy','伝承の砲術','砲撃威力 ＋30%',35,['might','memory'],500,510],
@@ -22,7 +22,7 @@ export const defaultLoadout=Object.freeze({stone:20,iron:4,burst:2,repair:0});
 function validCounts(loadout){return !!loadout&&typeof loadout==='object'&&Object.keys(loadout).every(id=>CARGO_TYPES.some(t=>t.id===id))&&CARGO_TYPES.every(t=>Number.isSafeInteger(loadout[t.id])&&loadout[t.id]>=0&&loadout[t.id]<=10000);}
 export function cargoWeight(loadout){return validCounts(loadout)?CARGO_TYPES.reduce((sum,t)=>sum+loadout[t.id]*t.weight,0):Infinity;}
 export function validLoadout(loadout,capacity){return Number.isFinite(capacity)&&cargoWeight(loadout)<=capacity&&loadout.stone+loadout.iron+loadout.burst>0;}
-export function startJourney(meta={},loadout=defaultLoadout){const fx=altarEffects(meta.altarOwned||[]);if(!validLoadout(loadout,fx.carryCapacity))return null;const inventory={...loadout};return {coins:fx.startCoins,stage:1,levels:{power:1,speed:1,auto:0},owned:[],turrets:[],auto:false,hp:fx.maxHP,maxHP:fx.maxHP,ammo:inventory.stone+inventory.iron+inventory.burst,ammoCapacity:fx.ammoCapacity,carryCapacity:fx.carryCapacity,inventory,selectedAmmo:inventory.stone?'stone':inventory.iron?'iron':'burst',treasureClaimed:[],clearClaimed:[],journeySouls:0,day:1,relics:[],pendingChoices:null,threat:'quiet'};}
+export function startJourney(meta={},loadout=defaultLoadout){const fx=altarEffects(meta.altarOwned||[]);if(!validLoadout(loadout,fx.carryCapacity))return null;const inventory={...loadout};return {coins:fx.startCoins,stage:1,levels:{power:1,speed:1,auto:0},owned:[],turrets:[],auto:false,hp:fx.maxHP,maxHP:fx.maxHP,ammo:inventory.stone+inventory.iron+inventory.burst,ammoCapacity:fx.ammoCapacity,carryCapacity:fx.carryCapacity,inventory,selectedAmmo:inventory.stone?'stone':inventory.iron?'iron':'burst',treasureClaimed:[],clearClaimed:[],deviceClaimed:[],coreClaimed:[],journeySouls:0,day:1,relics:[],pendingChoices:null,threat:'quiet'};}
 export function spendInventory(inventory,type,count=1){if(!validCounts(inventory)||!CARGO_TYPES.some(t=>t.id===type)||!Number.isSafeInteger(count)||count<=0||inventory[type]<count)return null;return {...inventory,[type]:inventory[type]-count};}
 export function useRepair(hp,maxHP,inventory){if(!Number.isFinite(hp)||!Number.isFinite(maxHP)||hp<=0||hp>=maxHP)return null;const next=spendInventory(inventory,'repair');return next?{hp:Math.min(maxHP,hp+35),inventory:next}:null;}
 export function spendAmmo(ammo,count=1){return Number.isSafeInteger(ammo)&&Number.isSafeInteger(count)&&ammo>=0&&count>0&&ammo>=count?ammo-count:null;}

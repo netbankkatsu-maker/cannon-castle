@@ -1,10 +1,10 @@
-// Purchase prerequisites form a directed acyclic graph; every node is permanent.
+// Purchase prerequisites form a directed acyclic graph; nodes last for one journey.
 const branches = [
  [['large','大型弾','砲弾を大型化する',650],['weight','重量増加','砲弾の重量を増やす',1400],['impact','衝撃強化','直撃の威力を上げる',3000],['collapse','倒壊衝撃','瓦礫の衝突威力を上げる',6000]],
- [['blast','爆風拡大','爆風の範囲を広げる',650],['fragments','破片飛散','爆風を強化し、破片で周囲にもダメージ',1600],['ignite','誘爆強化','火薬庫の爆発を強化する',3500],['chain','連鎖破壊','連鎖の報酬と破壊力を上げる',8500]],
+ [['blast','爆風拡大','爆風の範囲を広げる',650],['fragments','破片飛散','爆風を強化し、破片で周囲にもダメージ',1600],['ignite','誘爆強化','火薬庫の爆発を強化する',3500],['chain','連鎖破壊','連鎖で解放した刻印片と破壊力を増やす',8500]],
  [['focus','集中砲撃','狙った場所への威力を上げる',700],['cracks','亀裂蓄積','傷んだブロックへの威力を上げる',1700],['double','二連射','一度に二発撃つ',3800],['pierce','貫通弾','砲弾が壁を貫く',7000]],
  [['weak','弱点照準','自動砲撃が傷んだ場所を狙う',750],['foundation','土台優先','自動砲撃が低い支えを狙う',1900],['coordination','砲台連携','砲台が同じ標的を狙う',4500],['salvo','同時斉射','砲台が同時に射撃する',8000]],
- [['treasure','宝物増収','宝物庫の報酬を増やす',1000],['advance','時代の収集家','全ての砲弾の爆風威力 ＋15%',12000]],
+ [['treasure','刻印増収','技術装置から得る刻印片を増やす',1000],['advance','時代の収集家','全ての砲弾の爆風威力 ＋15%',12000]],
 ];
 const extra={chain:['collapse'],pierce:['impact'],coordination:['focus'],advance:['chain']};
 export const UPGRADES=branches.flatMap((branch,column)=>branch.map(([id,name,description,cost],row)=>Object.freeze({id,name,description,cost,requires:Object.freeze([...(row?[branch[row-1][0]]:[]),...(extra[id]||[])]),x:80+column*155,y:110+row*185}))); 

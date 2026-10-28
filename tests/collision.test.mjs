@@ -7,7 +7,7 @@ test('material HP and mass vary, rewards use damage fraction, every castle has i
  for(let stage=1;stage<=5;stage++){
   const {blocks}=castleBlueprint(stage);
   for(const b of blocks){assert.ok(b.mass>0);assert.ok(b.maxHP>0);assert.ok(b.buildingId);assert.ok(MATERIALS[b.material]);}
-  assert.equal(blocks.filter(b=>b.role==='powder').length,1);assert.equal(blocks.filter(b=>b.role==='treasure').length,1);
+  assert.equal(blocks.filter(b=>b.role==='powder').length,1);assert.equal(blocks.filter(b=>b.role==='device').length,4);assert.equal(blocks.filter(b=>b.role==='core').length,1);
  }
  assert.equal(destructionPercent([{hp:25,maxHP:50},{hp:90,maxHP:180}]),50);
 });

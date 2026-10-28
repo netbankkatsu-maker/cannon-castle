@@ -1,4 +1,4 @@
-import {MATERIALS} from './collision.mjs?v=10';
+import {MATERIALS} from './collision.mjs?v=12';
 export const CASTLE_TYPES=[
  {id:'fortress',name:'石造りの砦'},
  {id:'fairytale',name:'おとぎの城'},
@@ -46,13 +46,18 @@ export function castleBlueprint(stage=1){
   for(const x of [-2,1]){box(x,x+1,-6.5,-4.5,4,'ivory');for(let xx=x;xx<=x+1;xx++)for(let z=-6.5;z<=-4.5;z++)put(xx,4,z,'terracotta')}
   flags.push(column(0,-3.5,7,'brick',true));
  }
- // The two stores sit behind the front wall, not in the turret placement area.
- const store=(x,z,role,tone)=>{const key=[x,0,z].join(':');if(!cells.has(key)){building='store:'+role;put(x,0,z,tone)}const cell=cells.get(key);cell.role=role;cell.tone=tone;cell.buildingId='store:'+role;};
- store(0,-3.5,'treasure','gold');store(1,-5.5,'powder','powder');
- building='barracks';for(let r=0;r<2;r++){const key=put(-2,r,-4.5,'slate');const cell=cells.get(key);cell.buildingId='barracks';if(r===0)cell.role='barracks';}
+ // Devices replace ground-level cells without removing their support or anchors.
+ const store=(x,z,role,tone,deviceId)=>{const key=[x,0,z].join(':');if(!cells.has(key)){building='store:'+role;put(x,0,z,tone)}const cell=cells.get(key);cell.role=role;cell.tone=tone;cell.deviceId=deviceId;cell.buildingId='store:'+(deviceId||role);};
+ store(-1,-3.5,'device','slate','front');
+ store(2,-3.5,'device','slate','archive');
+ store(-1,-5.5,'device','slate','forge');
+ store(2,-6.5,'device','slate','deep');
+ store(0,-4.5,'core','slate');
+ store(1,-5.5,'powder','powder');
+ building='barracks';for(let r=0;r<2;r++){const key=put(-2,r,-4.5,'slate');const cell=cells.get(key);cell.buildingId='barracks';if(r===0){cell.role='barracks';cell.deviceId='barracks';}}
 
  const blocks=[...cells.entries()].map(([key,cell])=>{
-  const material=cell.role?'wood':cell.kind==='cone'||cell.tone==='terracotta'?'wood':['rose','brick'].includes(cell.tone)?'brick':'stone';
+  const material=['device','core'].includes(cell.role)?'stone':cell.role?'wood':cell.kind==='cone'||cell.tone==='terracotta'?'wood':['rose','brick'].includes(cell.tone)?'brick':'stone';
   return {key,...cell,material,maxHP:MATERIALS[material].hp,mass:MATERIALS[material].mass*(cell.kind==='cone'?.65:1)};
  });
  return {type,blocks,flags,maxHeight:Math.max(...blocks.map(b=>b.y+(b.kind==='cone'?.9:.38)))};

@@ -6,7 +6,7 @@ export function createFeedback({ root, money, reduced = false, sound = true, onS
   document.body.append(overlay);
   const button = document.createElement('button');
   button.type = 'button';
-  button.style.cssText = 'flex:0 0 44px;width:44px;min-height:44px;padding:0;border:1px solid #54657a;background:#172437;color:#ffdf8c;font-size:18px;border-radius:12px;';
+  button.className = 'sound-toggle';
   (root.querySelector('.top') || root).append(button);
   let enabled = Boolean(sound), context, activeVoices = 0, pending, lastFlush = 0;
   let sequence = 1, label, labelUntil = 0, disposed = false, moneyAnimation;
@@ -27,23 +27,23 @@ export function createFeedback({ root, money, reduced = false, sound = true, onS
       if (context.state === 'suspended') context.resume().catch(() => {});
     } catch { /* Sound may be unavailable; gameplay remains usable. */ }
   }
-  function tone(big, count) {
+  function tone(big, count, core = false) {
     if (!enabled || document.hidden || !context || context.state !== 'running' || activeVoices >= 6) return;
-    const notes = big || count >= 12 ? [0, 4, 7] : count >= 6 ? [0, 4] : [0];
+    const notes = core ? [0, 7, 19] : big || count >= 12 ? [0, 7] : count >= 6 ? [0, 12] : [0];
     for (const interval of notes) {
       if (activeVoices >= 6) break;
       try {
         const oscillator = context.createOscillator(), gain = context.createGain();
-        const at = context.currentTime, frequency = 440 * 2 ** ((Math.min(12, Math.max(0, count - 1)) + interval) / 12);
+        const at = context.currentTime, frequency = (core ? 196 : 640) * 2 ** ((Math.min(7, Math.max(0, count - 1)) * .5 + interval) / 12), duration = core ? .48 : .13;
         oscillator.type = 'sine';
         oscillator.frequency.setValueAtTime(frequency, at);
         gain.gain.setValueAtTime(0, at);
-        gain.gain.linearRampToValueAtTime(notes.length > 1 ? 0.027 : 0.045, at + 0.008);
-        gain.gain.exponentialRampToValueAtTime(0.001, at + 0.16);
+        gain.gain.linearRampToValueAtTime(core ? .016 : notes.length > 1 ? .012 : .02, at + .006);
+        gain.gain.exponentialRampToValueAtTime(0.001, at + duration);
         oscillator.connect(gain); gain.connect(context.destination);
         activeVoices++; voices.add(oscillator);
         oscillator.onended = () => { activeVoices = Math.max(0, activeVoices - 1); voices.delete(oscillator); oscillator.disconnect(); gain.disconnect(); };
-        oscillator.start(at); oscillator.stop(at + 0.18);
+        oscillator.start(at); oscillator.stop(at + duration + .02);
       } catch { /* Ignore audio device failures. */ }
     }
   }
@@ -58,7 +58,7 @@ export function createFeedback({ root, money, reduced = false, sound = true, onS
   function bounce() {
     if (prefersReduced()) return;
     moneyAnimation?.cancel();
-    moneyAnimation = animate(money, [{ transform: 'scale(1)' }, { transform: 'scale(1.09)' }, { transform: 'scale(1)' }], { duration: 190 });
+    moneyAnimation = animate(money, [{ transform: 'scale(1)' }, { transform: 'scale(1.035)' }, { transform: 'scale(1)' }], { duration: 190 });
   }
   function flush() {
     if (!pending || disposed || document.hidden) return;
@@ -66,18 +66,18 @@ export function createFeedback({ root, money, reduced = false, sound = true, onS
     if (prefersReduced()) { tone(reward.big, reward.chain); return; }
     const target = money.getBoundingClientRect();
     const tx = target.left + target.width / 2, ty = target.top + target.height / 2;
-    const number = reward.big ? 7 : 3;
+    const number = reward.big ? 6 : 3;
     for (let i = 0; i < number && coins.size < 24; i++) {
       const coin = document.createElement('span');
-      const size = reward.big ? 19 : 13;
-      coin.textContent = '✦';
-      coin.style.cssText = `position:absolute;left:0;top:0;width:${size}px;height:${size}px;display:grid;place-items:center;border-radius:50%;border:1px solid #fff0aa;background:#efb940;color:#fff3bc;font-size:${size - 4}px;box-shadow:0 0 8px #ffd65b99;`;
-      const x = Math.max(8, Math.min(innerWidth - 24, reward.x)), y = Math.max(8, Math.min(innerHeight - 24, reward.y));
+      const size = reward.big ? 16 : 11;
+      coin.className = 'ash-shard';
+      coin.style.cssText = `width:${size}px;height:${size * 1.45}px;`;
+      const x = Math.max(8, Math.min(innerWidth - 24, reward.x)), y = Math.max(8, Math.min(innerHeight - 24, reward.y)), rotation = (i % 2 ? -1 : 1) * (13 + i * 17);
       overlay.append(coin); coins.add(coin);
       animate(coin, [
-        { transform: `translate(${x}px,${y}px) scale(.7)`, opacity: 0 },
-        { transform: `translate(${x + (i - number / 2) * 13}px,${y - 28 - i * 3}px) scale(1)`, opacity: 1, offset: .25 },
-        { transform: `translate(${tx - size / 2}px,${ty - size / 2}px) scale(.5)`, opacity: 1 }
+        { transform: `translate(${x}px,${y}px) rotate(${rotation}deg) scale(.7)`, opacity: 0 },
+        { transform: `translate(${x + (i - number / 2) * 13}px,${y - 28 - i * 3}px) rotate(${rotation + 22}deg) scale(1)`, opacity: .9, offset: .25 },
+        { transform: `translate(${tx - size / 2}px,${ty - size / 2}px) rotate(${rotation + 48}deg) scale(.3)`, opacity: .25 }
       ], { duration: 650, delay: i * 24, easing: 'cubic-bezier(.35,.05,.7,1)', fill: 'both' }, () => {
         coins.delete(coin); coin.remove(); if (i === 0) { bounce(); tone(reward.big, reward.chain); }
       });
@@ -97,9 +97,21 @@ export function createFeedback({ root, money, reduced = false, sound = true, onS
     if (sequence < 3 || document.hidden) return;
     label ||= document.createElement('div');
     const viewport = (root.querySelector('.viewport') || root).getBoundingClientRect();
-    label.style.cssText = `position:absolute;left:${viewport.left + viewport.width / 2}px;top:${viewport.top + viewport.height * .24}px;transform:translateX(-50%);color:#fff0a8;font-size:22px;font-weight:900;text-shadow:0 2px 5px #422700;white-space:nowrap;`;
-    label.textContent = `${sequence} 連鎖！`;
+    label.style.cssText = `position:absolute;left:${viewport.left + viewport.width / 2}px;top:${viewport.top + viewport.height * .24}px;transform:translateX(-50%);color:#d5d5d0;font-size:14px;font-weight:600;letter-spacing:.12em;text-shadow:0 2px 5px #121820;white-space:nowrap;`;
+    label.textContent = `連鎖 · ${sequence}`;
     overlay.append(label); labelUntil = performance.now() + 900;
+  }
+  function core({ x = innerWidth / 2, y = innerHeight / 2 } = {}) {
+    if (disposed || document.hidden) return;
+    tone(true, 1, true);
+    if (prefersReduced() || coins.size >= 24) return;
+    const halo = document.createElement('span');
+    halo.className = 'core-release';
+    const px = Math.max(32, Math.min(innerWidth - 32, Number.isFinite(x) ? x : innerWidth / 2));
+    const py = Math.max(32, Math.min(innerHeight - 32, Number.isFinite(y) ? y : innerHeight / 2));
+    halo.style.cssText = `left:${px - 30}px;top:${py - 30}px;`;
+    overlay.append(halo); coins.add(halo);
+    animate(halo, [{ transform: 'scale(.4)', opacity: 0 }, { transform: 'scale(1)', opacity: .7, offset: .2 }, { transform: 'scale(2.2)', opacity: 0 }], { duration: 700, easing: 'ease-out' }, () => { coins.delete(halo); halo.remove(); });
   }
   function tick(now = performance.now()) {
     if (now - lastFlush >= 80) { lastFlush = now; flush(); }
@@ -130,5 +142,5 @@ export function createFeedback({ root, money, reduced = false, sound = true, onS
     document.removeEventListener('visibilitychange', visibility);
     context?.close().catch(() => {});
   }
-  return { reward, chain, tick, unlock, setSound, clear, dispose };
+  return { reward, core, chain, tick, unlock, setSound, clear, dispose };
 }

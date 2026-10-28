@@ -1,4 +1,4 @@
-import {RELICS} from './relics.mjs?v=10';
+import {RELICS} from './relics.mjs?v=12';
 export function createLoot({root,onChoose}){
  const dialog=document.createElement('dialog');dialog.className='loot-dialog';dialog.setAttribute('aria-labelledby','loot-title');
  dialog.innerHTML='<h2 id="loot-title">時代の遺物</h2><p>ひとつ選び、次の城へ。効果はこの旅の間だけ。</p><div class="loot-cards"></div>';

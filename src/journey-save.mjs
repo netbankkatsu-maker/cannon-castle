@@ -1,8 +1,9 @@
-import {THREATS} from './threats.mjs?v=10';
-import {STORY} from './story.mjs?v=10';
-import {RELICS} from './relics.mjs?v=10';
-import {ALTAR_UPGRADES,altarEffects,defaultLoadout,cargoWeight,validLoadout} from './expedition.mjs?v=10';
-import {loadSave,validateSave} from './save.mjs?v=10';
+import {validDeviceClaims} from './rewards.mjs?v=12';
+import {THREATS} from './threats.mjs?v=12';
+import {STORY} from './story.mjs?v=12';
+import {RELICS} from './relics.mjs?v=12';
+import {ALTAR_UPGRADES,altarEffects,defaultLoadout,cargoWeight,validLoadout} from './expedition.mjs?v=12';
+import {loadSave,validateSave} from './save.mjs?v=12';
 export const JOURNEY_SAVE_KEY='cannon-castle-journey-v2';
 export const SAVE_KEY=JOURNEY_SAVE_KEY;
 const int=(n,min,max)=>Number.isSafeInteger(n)&&n>=min&&n<=max;
@@ -13,7 +14,8 @@ export function validateJourney(raw){
  const storySeen=raw.storySeen??[];if(!Array.isArray(storySeen)||storySeen.length>50||storySeen.some(id=>!Object.hasOwn(STORY,id)))return null;const fx=altarEffects(raw.altarOwned);if(!validLoadout(raw.loadout,fx.carryCapacity)||!int(raw.bestDay,1,10000)||!int(raw.journeys,0,1e9))return null;
  let run=null;
  if(raw.run!=null){const base=validateSave({...raw.run,version:1,sound:raw.sound});if(!base||!Number.isFinite(raw.run.hp)||raw.run.hp<0||raw.run.hp>fx.maxHP||raw.run.maxHP!==fx.maxHP||raw.run.ammoCapacity!==fx.ammoCapacity||cargoWeight(raw.run.inventory)>fx.carryCapacity||!['stone','iron','burst'].includes(raw.run.selectedAmmo)||!amount(raw.run.journeySouls)||!int(raw.run.day,1,10000))return null;
-  const threat=raw.run.threat??'quiet';if(!THREATS.some(t=>t.id===threat))return null;const relics=raw.run.relics??[],pendingChoices=raw.run.pendingChoices??null,relicIds=new Set(RELICS.map(r=>r.id));if(!Array.isArray(relics)||relics.length>20000||relics.some(id=>!relicIds.has(id))||(pendingChoices!==null&&(!Array.isArray(pendingChoices)||pendingChoices.length!==3||new Set(pendingChoices).size!==3||pendingChoices.some(id=>!relicIds.has(id)))))return null;const {version,sound,...progress}=base;run={...progress,hp:raw.run.hp,maxHP:fx.maxHP,ammo:raw.run.inventory.stone+raw.run.inventory.iron+raw.run.inventory.burst,ammoCapacity:fx.ammoCapacity,carryCapacity:fx.carryCapacity,inventory:{...raw.run.inventory},selectedAmmo:raw.run.selectedAmmo,journeySouls:raw.run.journeySouls,day:raw.run.day,threat,relics:[...relics],pendingChoices:pendingChoices?[...pendingChoices]:null};
+  const deviceClaimed=raw.run.deviceClaimed??[],coreClaimed=raw.run.coreClaimed??[...base.clearClaimed];if(!validDeviceClaims(deviceClaimed)||!Array.isArray(coreClaimed)||coreClaimed.length>10000||new Set(coreClaimed).size!==coreClaimed.length||coreClaimed.some(n=>!int(n,1,10000)))return null;
+  const threat=raw.run.threat??'quiet';if(!THREATS.some(t=>t.id===threat))return null;const relics=raw.run.relics??[],pendingChoices=raw.run.pendingChoices??null,relicIds=new Set(RELICS.map(r=>r.id));if(!Array.isArray(relics)||relics.length>20000||relics.some(id=>!relicIds.has(id))||(pendingChoices!==null&&(!Array.isArray(pendingChoices)||pendingChoices.length!==3||new Set(pendingChoices).size!==3||pendingChoices.some(id=>!relicIds.has(id)))))return null;const {version,sound,...progress}=base;run={...progress,deviceClaimed:[...deviceClaimed],coreClaimed:[...coreClaimed],hp:raw.run.hp,maxHP:fx.maxHP,ammo:raw.run.inventory.stone+raw.run.inventory.iron+raw.run.inventory.burst,ammoCapacity:fx.ammoCapacity,carryCapacity:fx.carryCapacity,inventory:{...raw.run.inventory},selectedAmmo:raw.run.selectedAmmo,journeySouls:raw.run.journeySouls,day:raw.run.day,threat,relics:[...relics],pendingChoices:pendingChoices?[...pendingChoices]:null};
  }
  if(raw.screen==='battle'&&!run)return null;
  return {version:2,storySeen:[...new Set(storySeen)],screen:raw.screen,souls:raw.souls,altarOwned:[...raw.altarOwned],loadout:{...raw.loadout},sound:raw.sound!==false,run,bestDay:raw.bestDay,journeys:raw.journeys};

@@ -1,4 +1,4 @@
-import {UPGRADES,canPurchase} from './progression.mjs?v=12';
+import {UPGRADES,canPurchase} from './progression.mjs?v=13';
 export function pinchTransform({scale,offset,points},current,rect){
  const distance=p=>Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);
  const center=p=>({x:(p[0].x+p[1].x)/2-rect.left,y:(p[0].y+p[1].y)/2-rect.top});

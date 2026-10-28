@@ -1,4 +1,4 @@
-import {MATERIALS} from './collision.mjs?v=12';
+import {MATERIALS} from './collision.mjs?v=13';
 export const CASTLE_TYPES=[
  {id:'fortress',name:'石造りの砦'},
  {id:'fairytale',name:'おとぎの城'},

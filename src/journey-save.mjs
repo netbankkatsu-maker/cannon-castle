@@ -1,9 +1,9 @@
-import {validDeviceClaims} from './rewards.mjs?v=12';
-import {THREATS} from './threats.mjs?v=12';
-import {STORY} from './story.mjs?v=12';
-import {RELICS} from './relics.mjs?v=12';
-import {ALTAR_UPGRADES,altarEffects,defaultLoadout,cargoWeight,validLoadout} from './expedition.mjs?v=12';
-import {loadSave,validateSave} from './save.mjs?v=12';
+import {validDeviceClaims} from './rewards.mjs?v=13';
+import {THREATS} from './threats.mjs?v=13';
+import {STORY} from './story.mjs?v=13';
+import {RELICS} from './relics.mjs?v=13';
+import {ALTAR_UPGRADES,altarEffects,defaultLoadout,cargoWeight,validLoadout} from './expedition.mjs?v=13';
+import {loadSave,validateSave} from './save.mjs?v=13';
 export const JOURNEY_SAVE_KEY='cannon-castle-journey-v2';
 export const SAVE_KEY=JOURNEY_SAVE_KEY;
 const int=(n,min,max)=>Number.isSafeInteger(n)&&n>=min&&n<=max;

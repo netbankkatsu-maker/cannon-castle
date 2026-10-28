@@ -1,4 +1,4 @@
-import {MATERIALS} from './collision.mjs?v=12';
+import {MATERIALS} from './collision.mjs?v=13';
 export const TUTORIAL_KEY='cannon-castle-tutorial-v1';
 export const STEPS=Object.freeze([
  {id:'stone',selector:'[data-cargo="stone"]',title:'弾を準備する',text:'石弾の数を10にしてください。ここで持ち込む数を決めます。',event:'cargo-stone'},
@@ -55,7 +55,7 @@ export function createTutorial({root,storage,hasProgress,getPractice,onStart,onE
   card.style.width=Math.min(300,w-20)+'px';const size=card.getBoundingClientRect(),pos=active&&visible?placeCard(local,w,h,size.width,size.height):{left:(w-size.width)/2,top:Math.max(8,(h-size.height)/2)};
   const safe=getComputedStyle(host),safeTop=parseFloat(safe.getPropertyValue('--guide-safe-top'))||0,safeBottom=parseFloat(safe.getPropertyValue('--guide-safe-bottom'))||0;card.style.left=pos.left+'px';card.style.top=(Math.max(safeTop+8,Math.min(h-safeBottom-size.height-8,pos.top))+offset)+'px';
   if(offscreen&&r)locate.textContent=r.top>h+offset?'↓ 下の対象へ移動':'↑ 上の対象へ移動';
-  const element=target();if(element!==lastTarget){lastTarget?.removeAttribute('aria-describedby');element?.setAttribute('aria-describedby','tutorial-instruction');lastTarget=element;}
+  const element=target();if(element!==lastTarget){lastTarget?.removeAttribute('aria-describedby');element?.setAttribute('aria-describedby','tutorial-instruction');element?.focus({preventScroll:true});lastTarget=element;}
  }
  const block=e=>{if(!open||host.contains(e.target))return;if(!active){e.preventDefault();e.stopImmediatePropagation();return;}const el=target(),canvas=!STEPS[index].selector&&e.target===root.querySelector('canvas');if((el&&(el===e.target||el.contains(e.target)))||canvas)return;e.preventDefault();e.stopImmediatePropagation();};
  root.addEventListener('click',block,true);root.addEventListener('pointerdown',block,true);

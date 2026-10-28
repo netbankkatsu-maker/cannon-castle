@@ -1,4 +1,4 @@
-import {stageScale} from './progression.mjs?v=12';
+import {stageScale} from './progression.mjs?v=13';
 // Fixed identities are independent of physics positions and survive reconstruction.
 export const DEVICE_IDS=Object.freeze(['front','archive','forge','deep','barracks']);
 const shares={front:.10,archive:.15,forge:.20,deep:.30,barracks:.25};

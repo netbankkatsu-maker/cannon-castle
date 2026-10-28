@@ -1,22 +1,22 @@
-import {createTutorial,practiceBlueprint,practiceDamageAllowed} from './tutorial.mjs?v=12';
-import {deviceReward,coreSoulReward,claimDevice,claimCore,deviceIsClaimed} from './rewards.mjs?v=12';
-import {createFeedback} from './feedback.mjs?v=12';
-import {createNetwork} from './network.mjs?v=12';
-import {effects,purchaseUpgrade,stageScale} from './progression.mjs?v=12';
-import {loadJourney,writeJourney,validateJourney} from './journey-save.mjs?v=12';
-import {ALTAR_UPGRADES,altarEffects,canBuyAltar,buyAltar,CARGO_TYPES,defaultLoadout,cargoWeight,validLoadout,startJourney,spendInventory,takeHit,useRepair} from './expedition.mjs?v=12';
-import {createEnemies} from './enemies.mjs?v=12';
-import {drawRelics,relicEffects} from './relics.mjs?v=12';
-import {createStory} from './story.mjs?v=12';
-import {RELICS} from './relics.mjs?v=12';
-import {drawThreat,getThreat} from './threats.mjs?v=12';
-import {createLoot} from './loot.mjs?v=12';
-import {createContactGate,collisionDamage,consumeSpecial,createChain,MATERIALS} from './collision.mjs?v=12';
-import {castleBlueprint} from './castles.mjs?v=12';
-import {turretPrice,availableCells,canPlaceTurret,reloadProgress,velocityToTarget} from './turrets.mjs?v=12';
-import {SoftwareRenderer} from './software-renderer.mjs?v=12';
-import {assemblyProgress} from './assembly.mjs?v=12';
-import {BLOCK_HP, damageBlock, destructionPercent, blastDamage, shouldCompleteCastle, shapeDestructionPercent} from './damage.mjs?v=12';
+import {createTutorial,practiceBlueprint,practiceDamageAllowed} from './tutorial.mjs?v=13';
+import {deviceReward,coreSoulReward,claimDevice,claimCore,deviceIsClaimed} from './rewards.mjs?v=13';
+import {createFeedback} from './feedback.mjs?v=13';
+import {createNetwork} from './network.mjs?v=13';
+import {effects,purchaseUpgrade,stageScale} from './progression.mjs?v=13';
+import {loadJourney,writeJourney,validateJourney} from './journey-save.mjs?v=13';
+import {ALTAR_UPGRADES,altarEffects,canBuyAltar,buyAltar,CARGO_TYPES,defaultLoadout,cargoWeight,validLoadout,startJourney,spendInventory,takeHit,useRepair} from './expedition.mjs?v=13';
+import {createEnemies} from './enemies.mjs?v=13';
+import {drawRelics,relicEffects} from './relics.mjs?v=13';
+import {createStory} from './story.mjs?v=13';
+import {RELICS} from './relics.mjs?v=13';
+import {drawThreat,getThreat} from './threats.mjs?v=13';
+import {createLoot} from './loot.mjs?v=13';
+import {createContactGate,collisionDamage,consumeSpecial,createChain,MATERIALS} from './collision.mjs?v=13';
+import {castleBlueprint} from './castles.mjs?v=13';
+import {turretPrice,availableCells,canPlaceTurret,reloadProgress,velocityToTarget} from './turrets.mjs?v=13';
+import {SoftwareRenderer} from './software-renderer.mjs?v=13';
+import {assemblyProgress} from './assembly.mjs?v=13';
+import {BLOCK_HP, damageBlock, destructionPercent, blastDamage, shouldCompleteCastle, shapeDestructionPercent} from './damage.mjs?v=13';
 
 (async()=>{const root=document.getElementById('cannon-castle-3d'),q=s=>root.querySelector(s),view=q('.viewport');try{
 const [THREE,C]=await Promise.all([import('https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js'),import('https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js')]);
@@ -81,7 +81,7 @@ q('[data-auto]').addEventListener('change',()=>{clearElapsed=0;persist();});
 window.addEventListener('pagehide',persist);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)persist();});
 function ui(){
- const help=root.querySelector('.tutorial-entry');if(help)help.disabled=!['home','battle'].includes(mode)||!!assembly||cleared;
+ const help=root.querySelector('.tutorial-entry');if(help)help.disabled=!['home','battle','loot'].includes(mode)||!!assembly;
  const home=meta.screen==='home';root.classList.toggle('at-home',home);q('[data-home]').hidden=!home;q('.money').setAttribute('aria-label',home?'魂片':'所持刻印片');q('.coin-icon').textContent=home?'✧':'◇';q('[data-currency-label]').textContent=home?'魂片':'刻印片';
  q('[data-home-result]').textContent=homeResult;q('[data-relics]').textContent=relics.length?`遺物 ${relics.length} · 威力×${relicFX.power.toFixed(1)} / 装填×${relicFX.reload.toFixed(1)}`:'';q('[data-relics]').title=relics.map(id=>{const r=RELICS.find(r=>r.id===id);return r.name+'：'+r.benefit+' / '+r.drawback;}).join('\n');q('[data-home-record]').textContent=`最深到達 ${meta.bestDay}日目 · 遠征 ${meta.journeys}回`;
  if(home){q('[data-coins]').textContent=fmt(meta.souls);q('[data-cargo-weight]').textContent=`${cargoWeight(draftLoadout)} / ${permanent.carryCapacity}`;q('[data-start]').disabled=!ready||!validLoadout(draftLoadout,permanent.carryCapacity);return;}
@@ -240,11 +240,12 @@ guide=createTutorial({root,storage,hasProgress,getPractice:()=>({...meta,sound,r
  const backup=practiceBackup;practiceBackup=null;if(backup){restoreRuntime(backup.state);homeResult=backup.result;ui();}
  setTimeout(()=>{restoringPractice=false;if(!preview)persist();status(complete?'練習が終わりました。操作ガイドからいつでも再確認できます。':'練習を終了しました。元の旅へ戻りました。');},0);
 }});
-guideButton.addEventListener('click',()=>{if(['home','battle'].includes(mode)&&!assembly&&!cleared)guide.show();});
+guideButton.addEventListener('click',()=>{if(['home','battle','loot'].includes(mode)&&!assembly)guide.show();});
 renderer.setSize(view.clientWidth,view.clientHeight);camera.aspect=view.clientWidth/view.clientHeight;camera.updateProjectionMatrix();build();ready=true;q('.loading').hidden=true;ui();updateCargo();if(saved&&cannonHP<=0)returnHome('主砲が壊れた');else if(pendingChoices){cleared=true;mode='loot';enemies.clear();if(!playStory('firstClear'))loot.open(pendingChoices);ui();}else if(!preview&&guide.needsWelcome)guide.show();else if(meta.screen==='home')playStory('intro');
 let last=performance.now(),hudClock=0;
 function frame(now){
  if(!root.isConnected){resize.disconnect();clearGrid();clearBodies();feedback.dispose();guide?.dispose();network.dispose();altar.dispose();loot.dispose();story.dispose();enemies.dispose();fade.remove();renderer.dispose();return;}
+ const guideParent=(!guide?.isOpen&&root.querySelector('.loot-dialog[open]'))||root;if(guideButton.parentNode!==guideParent)guideParent.append(guideButton);
  const dt=Math.min((now-last)/1000,.1);last=now;feedback.tick(now);
  if(document.hidden){requestAnimationFrame(frame);return;}
  if(guide?.isOpen&&(!guide.active||!guide.combat&&mode==='battle'&&!assembly)){if(meta.screen==='battle')renderer.render(scene,camera);requestAnimationFrame(frame);return;}
